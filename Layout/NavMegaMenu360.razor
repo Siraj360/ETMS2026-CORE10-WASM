@@ -1,0 +1,263 @@
+﻿@* NavMegaMenu360.razor *@
+@inject HttpClient Http
+@inject NavigationManager NavManager
+@using ETMS2026CORE10WA.Model
+
+
+
+<nav class="navbar navbar-expand fixed-top bg-navbar border-bottom shadow ps-3 pe-2 text-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fs-3 lh-1 text-light" href="#">
+            <span class="lh-1 fw-bold font-shadow me-1">
+                 <i class="fa-solid fa-chalkboard-user"></i>
+                </span>
+            <span class="ms-1 fw-bold font-shadow">ETMS</span>
+            <small class="fs-6 lh-1 badge bg-dark rounded-pill">.Net Core 10</small>
+            @* <span class="fw-bold ms-2 text-warning">|</span> *@
+
+        </a>
+
+        <div class="navbar-nav me-auto mb-2 mb-lg-0 d-none d-md-flex">
+            <span class="ms-1 fs-5 lh-1">@Title</span>
+        </div>
+
+        <ul class="mega-menu-nav">
+
+            @* <li class="nav-item text-dark d-flex align-items-center">
+                <a class="nav-link dropbtn cursor-pointer" href="/dashboard" title="Home">
+                    <i class="fa-solid fa-gauge-high me-2"></i>
+                </a>
+            </li> *@
+
+            <li class="nav-item text-dark d-flex align-items-center">
+                <a class="nav-link dropbtn cursor-pointer" href="/" title="Home">
+                    <i class="fa-solid fa-house"></i>
+                    @* <span class="ms-2">|</span> *@
+                </a>
+            </li>
+
+            @foreach (var topLink in MenuLinks)
+            {
+                var dropdownRightOffset = !string.IsNullOrWhiteSpace(topLink.RightOffset) ? topLink.RightOffset : "5px"; // fallback to 5px
+                <li class="top-link-item">
+                    <a href="#" tabindex="0">
+                        <i class="@topLink.Icon"></i>
+                        <span class="d-none d-md-inline">@topLink.Name</span>
+                    </a>
+                    <div class="dropdown mega-dropdown shadow" style="--dropdown-right-offset: @dropdownRightOffset;">
+                        <div class="dropdown-content m-3">
+                            @foreach (var group in topLink.Groups)
+                            {
+                                var isImageGroup = group.Items.Any(i => i.Type?.ToLower() == "image");
+                                <div class="dropdown-col @(isImageGroup ? "image-column" : "")">
+                                    @foreach (var item in group.Items)
+                                    {
+                                        @switch (item.Type?.ToLower())
+                                        {
+                                            case "title":
+                                                <h5 class="dropdown-title @(string.IsNullOrWhiteSpace(item.Class) ? " " : item.Class)">
+                                                    @if (!string.IsNullOrWhiteSpace(item.Icon))
+                                                    {
+                                                        <i style="width:20px" class="me-2 @item.Icon"></i>
+                                                    }
+                                                    @item.Text
+                                                </h5>
+                                                break;
+                                            case "link":
+                                                <span class="mb-2">
+                                                    <a href="@item.Url" class="fs-6 text-decoration-none cursor-pointer @item.Class">
+                                                        @if (!string.IsNullOrWhiteSpace(item.Icon))
+                                                        {
+                                                            <i style="width:20px" class="me-2 @item.Icon"></i>
+                                                        }
+                                                        @item.Text
+                                                    </a>
+                                                </span>
+                                                break;
+                                            case "separator":
+                                                <hr class="dropdown-separator @(string.IsNullOrWhiteSpace(item.Class) ? "" : item.Class)" />
+                                                break;
+                                            case "image":
+                                                <div class="mega-menu-image text-center">
+                                                    <img src="@item.Src"
+                                                         class="img-fluid d-block @(string.IsNullOrWhiteSpace(item.Class) ? "mx-auto shadow" : item.Class)"
+                                                         alt="@item.Alt"
+                                                         style="max-width: 100%; height: auto;" />
+                                                </div>
+
+                                                break;
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+
+    </div>
+</nav>
+
+
+
+<style>
+    .bg-navbar {
+        background-color: #ffa500
+        /* #99e6ff; */
+    }
+
+    .font-shadow {
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .mega-menu-nav {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        background-color: transparent;
+        user-select: none;
+        position: relative;
+       
+    }
+
+    .top-link-item {
+        position: relative;
+        padding: 0.5rem 1rem;
+    }
+
+        .top-link-item > a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+    /* Dropdown container */
+    .mega-dropdown {
+        position: absolute;
+        top: 100%; /* open downward */
+        right: var(--dropdown-right-offset, 5px);
+        display: none;
+        background-color: #ffedcc;
+        z-index: 999999 !important; /* ensure above page text */
+        min-width: 280px;
+        max-width: 95vw;
+        overflow: auto;
+        border-radius: 4px;
+    }
+
+
+    /* Show dropdown on hover or focus */
+    .top-link-item:hover > .mega-dropdown,
+    .top-link-item:focus-within > .mega-dropdown {
+        display: flex;
+        flex-wrap: nowrap;
+        padding: 1rem;
+        max-width: calc(100vw - 40px);
+        /* Remove manual left/right override here to use default right from var */
+        /* right: auto; */
+        /* left: auto; */
+    }
+
+    .dropdown-content {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 2rem;
+    }
+
+    .dropdown-col {
+        min-width: 260px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dropdown-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .dropdown-link {
+        text-decoration: none;
+        /* color: #007bff; */
+        margin-bottom: 0.5rem;
+    }
+
+        .dropdown-link:hover {
+            text-decoration: underline;
+        }
+
+    .dropdown-separator {
+        margin: 0.5rem 0;
+        border-top: 1px solid #007399;
+    }
+
+
+    .mega-menu-image img {
+        /* max-width: 100px; */
+        height: auto;
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+
+        .mega-dropdown {
+            --dropdown-right-offset: 5px;
+            position: absolute;
+            width: 100%;
+            left: auto !important;
+            right: 5px;
+            max-height: 95vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-width: 95vw;
+        }
+
+        .dropdown-col {
+            min-width: 100%; /* allow it to stretch full-width on small devices */
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+            .dropdown-col img {
+                max-width: 100%;
+                height: auto;
+                object-fit: contain;
+            }
+        .dropdown-content {
+            flex-direction: column;
+            gap: 1rem;
+        }
+ }
+}
+</style>
+
+
+
+
+@code {
+    public string Title { get; set; } = "Employee Training Managment System";
+    private List<MegaMenuTopLink> MenuLinks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Build the full URL dynamically
+            string baseUri = NavManager.BaseUri; // e.g., "https://localhost:7000/"
+            string jsonPath = "menu.json";
+            string fullUrl = $"{baseUri}{jsonPath}";
+
+            MenuLinks = await Http.GetFromJsonAsync<List<MegaMenuTopLink>>(fullUrl);
+
+            // MenuLinks = await Http.GetFromJsonAsync<List<MegaMenuTopLink>>("https:localhost:7000/data/menu.json");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading menu.json: {ex.Message}");
+        }
+    }
+}
+   
