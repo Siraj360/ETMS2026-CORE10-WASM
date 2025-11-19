@@ -1,6 +1,6 @@
 {
-  "name": "ETMS2026CORE10WA",
-  "short_name": "ETMS2026CORE10WA",
+  "name": "MegaMenuWA",
+  "short_name": "MegaMenuWA",
   "id": "./",
   "start_url": "./",
   "display": "standalone",
